@@ -404,6 +404,7 @@ def main():
                 pass
             finally:
                 fig_win.title("概率曲线图")
+                fig_win.resizable(False, False)
 
             # 嵌入图像
             canvas = FigureCanvasTkAgg(figure, master=fig_win)
@@ -446,6 +447,7 @@ def main():
     finally:
         root.title("原神抽卡模拟器")
         root.geometry("576x576")
+        root.resizable(False, False)
 
     # 设置窗口元素
     tk.Label(root, text="纠缠之缘数量:").grid(row=0, column=0, padx=5, pady=5)
