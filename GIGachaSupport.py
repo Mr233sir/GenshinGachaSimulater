@@ -231,7 +231,8 @@ def sim(IntertwinedFateNum, Discounts, KrAu, KrAuEx, ExpectedCharacterNum, Chara
     else:
         possibility = 1
 
-    plt.vlines(x=position, ymin=0, ymax=possibility, label='不氪', linestyles='dashed', color='blue')
+    text = f'不氪:{position}抽,成功率{possibility * 100:.1f}%'
+    plt.vlines(x=position, ymin=0, ymax=possibility, label=text, linestyles='dashed', color='blue')
     plt.hlines(y=possibility, xmin=0, xmax=position, label='', linestyles='dashed', color='blue')
     output.append(f'不氪金成功率为{possibility * 100:.1f}%')
 
@@ -241,23 +242,26 @@ def sim(IntertwinedFateNum, Discounts, KrAu, KrAuEx, ExpectedCharacterNum, Chara
         if len(percentlist) > IntertwinedFateNum + FirstEx / Discounts:
             position = int(IntertwinedFateNum + FirstEx / Discounts)
             possibility = percentlist[position]
-            plt.vlines(x=position, ymin=0, ymax=possibility, label='首充', linestyles='dashed', color='green')
+            text = f'首充:{position}抽,成功率{possibility * 100:.1f}%'
+            plt.vlines(x=position, ymin=0, ymax=possibility, label=text, linestyles='dashed', color='green')
             plt.hlines(y=possibility, xmin=0, xmax=position, label='', linestyles='dashed', color='green')
         else:
             possibility = 1
         output.append(f'氪完首充后成功率为{possibility * 100:.1f}%')
 
     # 额外氪金计算
-    cols = generate_gradient_colors(int(KrAuEx / 648), 'gold', 'red')  # 生成渐变色标识
-    for i in range(int(KrAuEx / 648)):
-        if len(percentlist) > IntertwinedFateNum + (50.5 * (i + 1) + FirstEx) / Discounts:
-            position = int(int(IntertwinedFateNum + (50.5 * (i + 1) + FirstEx) / Discounts))
-            possibility = percentlist[position]
-            plt.vlines(x=position, ymin=0, ymax=possibility, label=f'氪{i + 1}单', linestyles='dashed', color=cols[i])
-            plt.hlines(y=possibility, xmin=0, xmax=position, label='', linestyles='dashed', color=cols[i])
-        else:
-            possibility = 1
-        output.append(f'额外氪{i + 1}个648后成功率为{possibility * 100:.1f}%')
+    if KrAuEx >= 648:
+        cols = generate_gradient_colors(int(KrAuEx / 648), 'gold', 'red')  # 生成渐变色标识
+        for i in range(int(KrAuEx / 648)):
+            if len(percentlist) > IntertwinedFateNum + (50.5 * (i + 1) + FirstEx) / Discounts:
+                position = int(int(IntertwinedFateNum + (50.5 * (i + 1) + FirstEx) / Discounts))
+                possibility = percentlist[position]
+                text = f'氪{i + 1}单:{position}抽,成功率{possibility * 100:.1f}%'
+                plt.vlines(x=position, ymin=0, ymax=possibility, label=text, linestyles='dashed', color=cols[i])
+                plt.hlines(y=possibility, xmin=0, xmax=position, label='', linestyles='dashed', color=cols[i])
+            else:
+                possibility = 1
+            output.append(f'额外氪{i + 1}个648后成功率为{possibility * 100:.1f}%')
 
     # 设置 Y 轴格式为百分比
     ax.yaxis.set_major_formatter(ticker.PercentFormatter(xmax=1.0))
@@ -266,17 +270,23 @@ def sim(IntertwinedFateNum, Discounts, KrAu, KrAuEx, ExpectedCharacterNum, Chara
     return output, fig
 
 
-def generate_gradient_colors(n, start='#FFFFFF', end='#000000'):  # 生成渐变色列表
+def generate_gradient_colors(n: int, start='#FFFFFF', end='#000000'):  # 生成渐变色列表
     start_color = colors.to_rgb(start)
     end_color = colors.to_rgb(end)
-    return [
-        (
-            start_color[0] + (end_color[0] - start_color[0]) * i / (n - 1),
-            start_color[1] + (end_color[1] - start_color[1]) * i / (n - 1),
-            start_color[2] + (end_color[2] - start_color[2]) * i / (n - 1)
-        )
-        for i in range(n)
-    ]
+    n = int(n)
+    if n == 1:
+        return [tuple(end_color)]
+    elif n > 1:
+        return [
+            (
+                start_color[0] + (end_color[0] - start_color[0]) * i / (n - 1),
+                start_color[1] + (end_color[1] - start_color[1]) * i / (n - 1),
+                start_color[2] + (end_color[2] - start_color[2]) * i / (n - 1)
+            )
+            for i in range(n)
+        ]
+    else:
+        raise ValueError("渐变色生成数量必须为正整数")
 
 
 # 获取软件图标
@@ -350,6 +360,9 @@ def main():
             elif not int(ExpectedCharacterNum.get() if ExpectedCharacterNum.get() else 0.0) + int(
                     ExpectedWeaponNum.get() if ExpectedWeaponNum.get() else 0.0):
                 raise ValueError("无抽取目标")
+            elif not 0 <= int(CharacterPoolStage.get() if CharacterPoolStage.get() else 0.0) < 90\
+                    or not 0 <= int(WeaponPoolStage.get() if WeaponPoolStage.get() else 0.0) < 80:
+                raise ValueError("水位超出范围")
             elif int(ExpectedCharacterNum.get() if ExpectedCharacterNum.get() else 0.0) * 630 + int(
                     ExpectedWeaponNum.get() if ExpectedWeaponNum.get() else 0.0) * 240 > 5000:
                 confirm = messagebox.askyesno("", "当前配置模拟耗时可能较长，请确认是否继续")
