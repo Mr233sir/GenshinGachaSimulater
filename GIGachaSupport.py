@@ -240,7 +240,7 @@ def sim(IntertwinedFateNum, Discounts, KrAu, KrAuEx, ExpectedCharacterNum, Chara
     FirstEx = int(KrAu / 8)
     if FirstEx:
         if len(percentlist) > IntertwinedFateNum + FirstEx / Discounts:
-            position = int(IntertwinedFateNum + FirstEx / Discounts)
+            position = int((IntertwinedFateNum + FirstEx) / Discounts)
             possibility = percentlist[position]
             text = f'首充:{position}抽,成功率{possibility * 100:.1f}%'
             plt.vlines(x=position, ymin=0, ymax=possibility, label=text, linestyles='dashed', color='green')
@@ -253,8 +253,8 @@ def sim(IntertwinedFateNum, Discounts, KrAu, KrAuEx, ExpectedCharacterNum, Chara
     if KrAuEx >= 648:
         cols = generate_gradient_colors(int(KrAuEx / 648), 'gold', 'red')  # 生成渐变色标识
         for i in range(int(KrAuEx / 648)):
-            if len(percentlist) > IntertwinedFateNum + (50.5 * (i + 1) + FirstEx) / Discounts:
-                position = int(int(IntertwinedFateNum + (50.5 * (i + 1) + FirstEx) / Discounts))
+            if len(percentlist) > (IntertwinedFateNum + 50.5 * (i + 1) + FirstEx) / Discounts:
+                position = int((IntertwinedFateNum + 50.5 * (i + 1) + FirstEx) / Discounts)
                 possibility = percentlist[position]
                 text = f'氪{i + 1}单:{position}抽,成功率{possibility * 100:.1f}%'
                 plt.vlines(x=position, ymin=0, ymax=possibility, label=text, linestyles='dashed', color=cols[i])
