@@ -201,24 +201,30 @@ def sim(IntertwinedFateNum, Discounts, KrAu, KrAuEx, ExpectedCharacterNum, Chara
     plt.rcParams['font.sans-serif'] = ['SimHei']
     fig, ax = plt.subplots()
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.1))
-    ax.yaxis.set_minor_locator(ticker.MultipleLocator(0.025))
+    ax.yaxis.set_minor_locator(ticker.MultipleLocator(0.02))
 
     # 设定横轴间距
     if len(percentlist) > 500:
         ax.xaxis.set_major_locator(ticker.MultipleLocator(50 * int(len(percentlist) / 250)))
-        ax.xaxis.set_minor_locator(ticker.MultipleLocator(12.5 * int(len(percentlist) / 250)))
+        ax.xaxis.set_minor_locator(ticker.MultipleLocator(10 * int(len(percentlist) / 250)))
     elif len(percentlist) > 200:
         ax.xaxis.set_major_locator(ticker.MultipleLocator(50))
-        ax.xaxis.set_minor_locator(ticker.MultipleLocator(12.5))
+        ax.xaxis.set_minor_locator(ticker.MultipleLocator(10))
     elif len(percentlist) > 80:
         ax.xaxis.set_major_locator(ticker.MultipleLocator(20))
-        ax.xaxis.set_minor_locator(ticker.MultipleLocator(5))
+        ax.xaxis.set_minor_locator(ticker.MultipleLocator(4))
     elif len(percentlist) > 30:
         ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
-        ax.xaxis.set_minor_locator(ticker.MultipleLocator(2.5))
+        ax.xaxis.set_minor_locator(ticker.MultipleLocator(2))
+    else:
+        ax.xaxis.set_major_locator(ticker.MultipleLocator(5))
+        ax.xaxis.set_minor_locator(ticker.MultipleLocator(1))
 
     # 描点画图
-    ax.set_title('原神抽卡成功率分布')
+    ax.set_title(f"抽{ExpectedCharacterNum}角色和{ExpectedWeaponNum}武器\n"
+                 f"角色池{'大' if CharacterPoolGuarantee else '小'}保底垫{CharacterPoolStage}抽，"
+                 f"武器池{'大' if WeaponPoolGuarantee else '小'}保底垫{WeaponPoolStage}抽\n"
+                 f"武器池命定值{BindingNum}，角色池已连续歪{CatchLight}次", fontsize=10)
     ax.grid(True)
     plt.plot(percentlist)
     plt.xlim(xmin=0, xmax=len(percentlist) + 5)
@@ -360,7 +366,7 @@ def main():
             elif not int(ExpectedCharacterNum.get() if ExpectedCharacterNum.get() else 0.0) + int(
                     ExpectedWeaponNum.get() if ExpectedWeaponNum.get() else 0.0):
                 raise ValueError("无抽取目标")
-            elif not 0 <= int(CharacterPoolStage.get() if CharacterPoolStage.get() else 0.0) < 90\
+            elif not 0 <= int(CharacterPoolStage.get() if CharacterPoolStage.get() else 0.0) < 90 \
                     or not 0 <= int(WeaponPoolStage.get() if WeaponPoolStage.get() else 0.0) < 80:
                 raise ValueError("水位超出范围")
             elif int(ExpectedCharacterNum.get() if ExpectedCharacterNum.get() else 0.0) * 630 + int(
