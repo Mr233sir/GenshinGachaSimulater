@@ -53,6 +53,26 @@ def sim(IntertwinedFateNum, Discounts, KrAu, KrAuEx, ExpectedCharacterNum, Chara
         else:
             return 1
 
+    def calc_mean_std(success_rates: list):
+        """
+        根据成功率列表计算期望抽数和标准差。
+
+        参数:
+            success_rates (list or array-like):
+                索引代表当前抽卡次数，值为对应的成功概率。
+
+        返回:
+            (mean, std): 期望值, 标准差
+        """
+        probs = np.array(success_rates, dtype=float)
+        trials = np.arange(len(probs))
+
+        mean_val = np.sum(trials * probs)
+        variance = np.sum((trials ** 2) * probs) - mean_val ** 2
+        std_val = np.sqrt(variance)
+
+        return mean_val, std_val
+
     # 初始化一个零矩阵
     size = 630 * ExpectedCharacterNum + 240 * ExpectedWeaponNum + 1  # 这里加上1是为了让最后一行表示达成抽卡预期的状态
     TPmatrix = np.zeros((size, size))
@@ -173,6 +193,7 @@ def sim(IntertwinedFateNum, Discounts, KrAu, KrAuEx, ExpectedCharacterNum, Chara
     percent75num = 0
     percent90num = 0
     percentlist = [0]
+    distributions = [0]
 
     # 存储达到预期次数的概率
     resultVector = initVector
@@ -184,6 +205,7 @@ def sim(IntertwinedFateNum, Discounts, KrAu, KrAuEx, ExpectedCharacterNum, Chara
         i += 1
         resultVector = resultVector @ TPmatrix
         result = resultVector[size - 1]
+        distributions.append(result - percentlist[-1])
         percentlist.append(result)
         if result > 0.1 and percent10num == 0:
             percent10num = i + 1
@@ -236,6 +258,9 @@ def sim(IntertwinedFateNum, Discounts, KrAu, KrAuEx, ExpectedCharacterNum, Chara
         possibility = percentlist[position]
     else:
         possibility = 1
+
+    mean, std = calc_mean_std(distributions)
+    output.append(f'期望需要{mean:.1f}抽，标准差为{std:.1f}抽')
 
     text = f'不氪:{position}抽,成功率{possibility * 100:.1f}%'
     plt.vlines(x=position, ymin=0, ymax=possibility, label=text, linestyles='dashed', color='blue')
